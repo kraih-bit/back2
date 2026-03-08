@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>XAUUSD Backtest</title>
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+body{background:#0e0e0e;color:white;font-family:Arial;margin:0;text-align:center;}
+#chart{width:100%;height:600px;}
+.panel{margin:15px;}
+</style>
+</head>
+<body>
+
+<h2>XAUUSD Backtest</h2>
+<div id="chart"></div>
+<div class="panel">
+<button onclick="start()">Start</button>
+<button onclick="pause()">Pause</button>
+<button onclick="buy()">Buy</button>
+<button onclick="sell()">Sell</button>
+Speed
+<input type="range" id="speed" min="50" max="1000" value="300">
+</div>
+<h3 id="profit">Profit: 0</h3>
+
+<script>
+const chart = LightweightCharts.createChart(document.getElementById("chart"),{
+    width: window.innerWidth,
+    height: 600,
+    layout:{background:{color:"#0e0e0e"},textColor:"white"}
+});
+const candles = chart.addCandlestickSeries();
+
+let index=0, timer;
+let position=null, entry=0, profit=0;
+
+// بيانات شموع جاهزة (xauusd) بالترتيب
+let data=[
+{time:1, open:2000, high:2005, low:1995, close:2003},
+{time:2, open:2003, high:2008, low:2001, close:2006},
+{time:3, open:2006, high:2010, low:2004, close:2008},
+{time:4, open:2008, high:2012, low:2007, close:2011},
+{time:5, open:2011, high:2015, low:2009, close:2013},
+{time:6, open:2013, high:2018, low:2010, close:2015},
+{time:7, open:2015, high:2020, low:2012, close:2018}
+];
+
+// عرض أول 3 شموع عند البداية
+candles.setData(data.slice(0,3));
+index=3;
+
+function start(){
+    let speed=document.getElementById("speed").value;
+    timer=setInterval(()=>{
+        if(index<data.length){
+            candles.update(data[index]);
+            if(position){
+                let price=data[index].close;
+                profit = (position==="buy") ? price-entry : entry-price;
+                document.getElementById("profit").innerText="Profit: "+profit.toFixed(2);
+            }
+            index++;
+        }
+    }, speed);
+}
+
+function pause(){ clearInterval(timer); }
+function buy(){ position="buy"; entry=data[index].close; }
+function sell(){ position="sell"; entry=data[index].close; }
+</script>
+
+</body>
+</html>
